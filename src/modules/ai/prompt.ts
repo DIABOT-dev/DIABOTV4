@@ -132,10 +132,75 @@ export function selectPromptTemplate(
     return getReminderReasonTemplate(context, reminderType);
   }
 
+  // Meal feedback
+  if (intent === 'meal_feedback') {
+    return getMealFeedbackTemplate(context);
+  }
+
   // Default: coach check-in
   return getCoachCheckinTemplate(context);
 }
 
+/**
+ * Template cho phản hồi về bữa ăn
+ */
+export function getMealFeedbackTemplate(context: UserContext): PromptTemplate {
+  return {
+    system: `Bạn là trợ lý dinh dưỡng DIABOT, chuyên tư vấn bữa ăn cho người tiểu đường.
+
+NGUYÊN TẮC QUAN TRỌNG:
+- KHÔNG chẩn đoán bệnh
+- KHÔNG kê đơn thuốc  
+- KHÔNG thay thế bác sĩ dinh dưỡng
+- CHỈ đưa ra gợi ý thực đơn an toàn
+- Tập trung vào cân bằng carb, protein, chất xơ
+
+PHONG CÁCH:
+- Thực tế, dễ áp dụng
+- Ngắn gọn, cụ thể
+- Khuyến khích thói quen tốt
+
+DỮ LIỆU NGƯỜI DÙNG:
+${context.summary}`,
+
+    user: `Hãy đưa ra gợi ý về bữa ăn dựa trên dữ liệu sức khỏe của tôi. Tập trung vào:
+1. Món ăn phù hợp với đường huyết hiện tại
+2. Cân bằng dinh dưỡng cho người tiểu đường
+3. Dễ chuẩn bị và thực hiện
+
+Trả lời trong 2-3 câu, thực tế và hữu ích.`
+  };
+}
+
+/**
+ * Đánh giá mức độ an toàn của AI response
+ */
+export function guardrails(output: string): 'low' | 'medium' | 'high' {
+  const dangerous = [
+    'chẩn đoán', 'bệnh', 'thuốc', 'liều', 'insulin', 'metformin',
+    'điều trị', 'khám', 'bác sĩ nói', 'tôi nghĩ bạn bị'
+  ];
+  
+  const medical = [
+    'nên gặp bác sĩ', 'tham khảo y tế', 'kiểm tra sức khỏe',
+    'theo dõi chặt chẽ', 'cần chú ý'
+  ];
+
+  const lower = output.toLowerCase();
+  
+  // High risk: chứa từ nguy hiểm
+  if (dangerous.some(word => lower.includes(word))) {
+    return 'high';
+  }
+  
+  // Medium risk: chứa từ y tế
+  if (medical.some(word => lower.includes(word))) {
+    return 'medium';
+  }
+  
+  // Low risk: an toàn
+  return 'low';
+}
 /**
  * Render prompt với context thay thế
  */

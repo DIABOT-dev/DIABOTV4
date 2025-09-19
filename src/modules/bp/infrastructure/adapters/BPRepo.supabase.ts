@@ -1,20 +1,21 @@
-    return { id: data.id, status: 201 as const };
+    import { BPLog } from '../../domain/types';
+import { supabase } from '@/lib/supabase/client';
+
+export const BPRepo = {
+  async insert(dto: BPLog) {
+    const { data, error } = await supabase
+      .from("bp_logs")
+      .insert({
+        systolic: dto.systolic,
+        diastolic: dto.diastolic,
+        pulse: dto.pulse ?? null,
+        taken_at: dto.taken_at,
+        // user_id để RLS tự điền theo session; không gửi từ UI
+      })
+      .select("id")
+      .single();
     if (error) throw error;
+    return { id: data.id, status: 201 as const };
   },
 
 };
-      .single();
-      .select("id")
-      })
-        // user_id để RLS tự điền theo session; không gửi từ UI
-        taken_at: dto.taken_at,
-        pulse: dto.pulse ?? null,
-        diastolic: dto.diastolic,
-        systolic: dto.systolic,
-      .insert({
-      .from("bp_logs")
-    const { data, error } = await supabase
-  async insert(dto: BPLog) {
-export const BPRepo = {
-import { BPLog } from '../../domain/types';
-import { supabase } from '@/lib/supabase/client';
