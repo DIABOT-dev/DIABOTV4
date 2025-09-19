@@ -1,120 +1,102 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Card from "@/interfaces/ui/components/atoms/Card";
 import Button from "@/interfaces/ui/components/atoms/Button";
-import Toast from "@/interfaces/ui/components/atoms/Toast";
 
 export default function Dashboard() {
   const router = useRouter();
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
-
-  const quickActions = [
-    { key: "water", label: "Uống nước", icon: "💧", path: "/log/water" },
-    { key: "bg", label: "Đường huyết", icon: "🩸", path: "/log/bg" },
-    { key: "meal", label: "Bữa ăn", icon: "🍽️", path: "/log/meal" },
-    { key: "insulin", label: "Insulin", icon: "💉", path: "/log/insulin" },
-  ];
-
-  const handleQuickAction = (path: string, label: string) => {
-    setToast({ message: `Mở ${label}...`, type: 'success' });
-    setTimeout(() => router.push(path), 500);
-  };
+  const goChart = () => router.push("/charts");
+  const quick = (path: string) => router.push(`/log/${path}`);
 
   return (
     <div className="min-h-screen pb-24 bg-bg">
       {/* Header */}
       <header className="p-4 bg-white shadow-sm">
-        <div className="max-w-md mx-auto">
-          <p className="text-sm text-muted">Xin chào, Tuấn Anh</p>
-          <h1 className="text-xl font-bold">Dashboard DIABOT V4</h1>
-          <p className="text-xs text-primary font-semibold">Điểm thưởng: 3,249</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm text-muted">Xin chào, Tuấn Anh</p>
+            <h1 className="text-xl font-bold">Hãy hoàn thành các mục tiêu</h1>
+          </div>
+          <div className="text-xs font-semibold text-primary-700">Điểm thưởng: 3,249</div>
         </div>
       </header>
 
-      <main className="p-4 max-w-md mx-auto space-y-4">
-        {/* Stats Overview */}
-        <Card data-testid="stats-overview">
-          <h2 className="font-semibold mb-3">Tổng quan hôm nay</h2>
-          <div className="grid grid-cols-3 gap-4 text-center">
+      <main className="p-4 space-y-4">
+        {/* Banner kế hoạch hôm nay */}
+        <div className="rounded-2xl p-4 bg-primary-50 border border-primary-100">
+          <p className="text-primary-700 font-semibold">Kế hoạch hôm nay</p>
+          <p className="text-2xl font-extrabold text-primary-700">Hãy hoàn thành các mục tiêu</p>
+        </div>
+
+        {/* Dữ liệu cá nhân */}
+        <Card className="p-4">
+          <div className="flex items-center justify-between">
             <div>
-              <p className="text-2xl font-bold text-primary">119</p>
-              <p className="text-xs text-muted">BG (mg/dL)</p>
+              <p className="font-semibold">Dữ liệu cá nhân</p>
+              <p className="text-sm text-muted">Biểu đồ & nhật ký </p>
             </div>
-            <div>
-              <p className="text-2xl font-bold text-primary">6</p>
-              <p className="text-xs text-muted">Cốc nước</p>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-primary">4.2k</p>
-              <p className="text-xs text-muted">Bước chân</p>
-            </div>
+            <button
+  onClick={goChart}                 // hiện đang trỏ /charts theo Cách A
+  className="h-[var(--h-input-sm)] px-10 rounded-lg border-2 border-primary text-primary bg-white hover:bg-primary-50 transition"
+>
+  Mở bảng
+</button>
+
           </div>
         </Card>
 
-        {/* Quick Actions */}
-        <Card data-testid="quick-actions">
-          <h2 className="font-semibold mb-3">Nhập liệu nhanh</h2>
-          <div className="grid grid-cols-2 gap-3">
-            {quickActions.map(({ key, label, icon, path }) => (
-              <Button
-                key={key}
-                variant="ghost"
-                size="lg"
-                onClick={() => handleQuickAction(path, label)}
-                className="flex-col h-20 gap-2"
-                data-testid={`quick-${key}`}
-              >
-                <span className="text-2xl">{icon}</span>
-                <span className="text-sm">{label}</span>
-              </Button>
-            ))}
+        {/* Khám phá & nhận thưởng */}
+        <Card className="p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-semibold">Khám phá & nhận thưởng</p>
+              <p className="text-sm text-muted">Hoàn thành thử thách để nhận điểm</p>
+            </div>
+            <Button size="sm" variant="secondary">Mở</Button>
           </div>
         </Card>
 
-        {/* Chart Placeholder */}
-        <Card data-testid="chart-section">
-          <h2 className="font-semibold mb-3">Biểu đồ 7 ngày</h2>
-          <div className="h-32 bg-gray-50 rounded-lg flex items-center justify-center">
-            <p className="text-sm text-muted">Chart sẽ được implement sau</p>
-          </div>
-          <Button 
-            variant="secondary" 
-            size="sm" 
-            className="w-full mt-3"
-            onClick={() => router.push("/charts")}
-          >
-            Xem chi tiết
-          </Button>
+      {/* Nhập liệu nhanh */}
+        
+<section>
+  <p className="font-semibold mb-3 text-[16px]">Nhập liệu nhanh</p>
+  <div className="grid grid-cols-4 gap-3">
+    {[
+      { key: "bg",      label: "Ghi đường huyết", icon: "/assets/icons/bg.png" },
+      { key: "insulin", label: "Tiêm insulin",    icon: "/assets/icons/insulin.png" },
+      { key: "water",   label: "Uống nước",       icon: "/assets/icons/water.png" },
+      { key: "meal",    label: "Bữa ăn",          icon: "/assets/icons/meal.png" },
+    ].map(({ key, label, icon }) => (
+      <button
+        key={key}
+        onClick={() => quick(key)}
+        className="group rounded-2xl p-4 text-center
+                   border border-primary-100 bg-primary-50 hover:bg-primary-100 transition"
+        aria-label={label}
+      >
+        {/* Icon to, KHÔNG bọc vòng trắng */}
+        <img src={icon} alt={label} className="mx-auto mb-2 h-9 w-9" />
+        <div className="text-[14px] font-semibold text-primary-700 group-hover:text-primary-700">
+          {label}
+        </div>
+      </button>
+    ))}
+  </div>
+</section>
+
+        {/* Bản tin cộng đồng – placeholder */}
+        <Card className="p-4">
+          <p className="font-semibold mb-1">Bản tin cộng đồng</p>
+          <p className="text-sm text-muted">Sắp ra mắt…</p>
         </Card>
 
-        {/* AI Agent Preview */}
-        <Card data-testid="ai-preview">
-          <h2 className="font-semibold mb-3">🤖 Trợ lý AI</h2>
-          <p className="text-sm text-muted mb-3">
-            Hỏi về đường huyết, thực đơn, hoặc lời khuyên sức khỏe
-          </p>
-          <Button 
-            variant="primary" 
-            size="md" 
-            className="w-full"
-            onClick={() => router.push("/ai-agent")}
-          >
-            Mở trò chuyện
-          </Button>
-        </Card>
+        {/* Liên kết nhanh tới trợ lý – optional */}
+        <div className="text-center text-sm">
+          <Link className="text-primary-700 underline" href="/ai-agent">Mở Trợ lý AI</Link>
+        </div>
       </main>
-
-      {/* Toast */}
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-          data-testid="dashboard-toast"
-        />
-      )}
     </div>
   );
 }

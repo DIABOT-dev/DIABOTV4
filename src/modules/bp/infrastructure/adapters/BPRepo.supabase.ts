@@ -1,17 +1,18 @@
-import { createClient } from "@supabase/supabase-js";
+// src/modules/bp/infrastructure/adapters/BPRepo.supabase.ts
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { BPLog } from "../../domain/types";
 
-// Direct import - không dùng alias để tránh lỗi resolve
+// 🔧 Hotfix: dùng createClient trực tiếp, bỏ alias "@/lib/supabase"
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey);
 
 export const BPRepo = {
   async insert(dto: BPLog) {
     const { data, error } = await supabase
       .from("bp_logs")
       .insert({
-        user_id: dto.user_id || "demo-user", // fallback cho dev
+        profile_id: dto.profile_id,   // giữ đồng bộ schema
         systolic: dto.systolic,
         diastolic: dto.diastolic,
         pulse: dto.pulse ?? null,
@@ -24,11 +25,11 @@ export const BPRepo = {
     return data;
   },
 
-  async list(user_id: string) {
+  async list(profile_id: string) {
     const { data, error } = await supabase
       .from("bp_logs")
       .select("*")
-      .eq("user_id", user_id)
+      .eq("profile_id", profile_id)
       .order("taken_at", { ascending: false });
 
     if (error) throw error;
