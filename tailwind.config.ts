@@ -5,21 +5,22 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        /* semantic surfaces */
+        // Semantic surfaces
         bg: "var(--color-bg)",
         surface: "var(--color-surface)",
         border: "var(--color-border)",
         text: "var(--color-text)",
         muted: "var(--color-text-muted)",
 
-        /* brand (xanh SM) */
+        // Brand colors
         primary: {
+          DEFAULT: "var(--color-primary)",
           600: "var(--color-primary-600)",
           700: "var(--color-primary-700)",
-          DEFAULT: "var(--color-primary)",
         },
         "on-primary": "var(--color-on-primary)",
 
+        // State colors
         danger: "var(--color-danger)",
       },
 
@@ -27,7 +28,6 @@ const config: Config = {
         card: "var(--shadow-card)",
       },
 
-      
       borderRadius: {
         sm: "var(--rd-sm)",
         lg: "var(--rd-lg)",
@@ -53,10 +53,13 @@ const config: Config = {
         3: "var(--sp-3)",
         4: "var(--sp-4)",
         6: "var(--sp-6)",
-        /* helpers tiện */
-        "token-4": "var(--sp-4)",
-        "token-6": "var(--sp-6)",
       },
+
+      height: {
+        'input-sm': "var(--h-input-sm)",
+        'input-md': "var(--h-input-md)",
+        'input-lg': "var(--h-input-lg)",
+      }
     },
   },
   plugins: [],

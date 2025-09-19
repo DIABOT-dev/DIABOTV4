@@ -1,9 +1,6 @@
-import "@/styles/index.css";
+import "@/interfaces/ui/styles/globals.css";
 import { Inter } from "next/font/google";
-import FloatingAIBtn from "@/interfaces/ui/components/FloatingAIBtn";
-import FAB_AI from "@/interfaces/ui/components/FAB_AI";
-import BottomNav from "@/interfaces/ui/components/BottomNav";
-
+import { ReactNode } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -12,13 +9,11 @@ export const metadata = {
   description: "Smart diabetes management with AI assistance",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="vi">
       <body className={inter.className + " bg-bg text-text min-h-screen"}>
         {children}
-          <FloatingAIBtn />   {/* ⬅️ FAB AI tách khỏi BottomNav */}
-        <BottomNav />
       </body>
     </html>
   );

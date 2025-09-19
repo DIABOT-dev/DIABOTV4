@@ -12,6 +12,8 @@
   --color-text-muted:#6B7280;
   --color-primary:   #10B981;
   --color-primary-600:#059669;
+  --color-primary-700:#047857;
+  --color-on-primary:#FFFFFF;
   --color-danger:    #EF4444;
   --shadow-card:     0 6px 20px rgba(0,0,0,0.04);
 
@@ -53,136 +55,7 @@
 }
 
 @layer components {
-  /* Button Components */
-  .btn {
-    @apply inline-flex items-center justify-center font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2;
-    border-radius: var(--rd-sm);
-  }
-  
-  .btn-primary {
-    background-color: var(--color-primary);
-    color: var(--color-surface);
-  }
-  
-  .btn-primary:hover {
-    background-color: var(--color-primary-600);
-  }
-  
-  .btn-primary:focus {
-    --tw-ring-color: var(--color-primary);
-  }
-  
-  .btn-ghost {
-    background-color: transparent;
-    color: var(--color-text);
-    border: 1px solid var(--color-border);
-  }
-  
-  .btn-ghost:hover {
-    background-color: var(--color-surface);
-  }
-  
-  .btn-danger {
-    background-color: var(--color-danger);
-    color: var(--color-surface);
-  }
-  
-  .btn-sm {
-    height: var(--h-input-sm);
-    padding: 0 var(--sp-3);
-    font-size: var(--fs-sm);
-  }
-  
-  .btn-md {
-    height: var(--h-input-md);
-    padding: 0 var(--sp-4);
-    font-size: var(--fs-md);
-  }
-  
-  .btn-lg {
-    height: var(--h-input-lg);
-    padding: 0 var(--sp-6);
-    font-size: var(--fs-lg);
-  }
-
-  /* Input Components */
-  .input {
-    @apply w-full border focus:outline-none focus:ring-2 focus:ring-offset-2;
-    border-radius: var(--rd-sm);
-    border-color: var(--color-border);
-    background-color: var(--color-surface);
-    color: var(--color-text);
-    padding: 0 var(--sp-3);
-  }
-  
-  .input:focus {
-    --tw-ring-color: var(--color-primary);
-  }
-  
-  .input-sm {
-    height: var(--h-input-sm);
-    font-size: var(--fs-sm);
-  }
-  
-  .input-md {
-    height: var(--h-input-md);
-    font-size: var(--fs-md);
-  }
-  
-  .input-lg {
-    height: var(--h-input-lg);
-    font-size: var(--fs-lg);
-  }
-
-  /* Card Component */
-  .card {
-    background-color: var(--color-surface);
-    border-radius: var(--rd-lg);
-    box-shadow: var(--shadow-card);
-    padding: var(--sp-4);
-  }
-
-  /* Stat Component */
-  .stat {
-    @apply text-center;
-  }
-  
-  .stat-label {
-    font-size: var(--fs-sm);
-    color: var(--color-text-muted);
-    margin-bottom: var(--sp-1);
-  }
-  
-  .stat-value {
-    font-size: var(--fs-xl);
-    font-weight: 600;
-    color: var(--color-text);
-    margin-bottom: var(--sp-1);
-  }
-  
-  .stat-hint {
-    font-size: var(--fs-xs);
-    color: var(--color-text-muted);
-  }
-
-  /* Toast Component */
-  .toast {
-    background-color: var(--color-surface);
-    border-radius: var(--rd-sm);
-    box-shadow: var(--shadow-card);
-    padding: var(--sp-3) var(--sp-4);
-    border-left: 4px solid var(--color-primary);
-  }
-  
-  .toast-success {
-    border-left-color: var(--color-primary);
-  }
-  
-  .toast-danger {
-    border-left-color: var(--color-danger);
-  }
-
-  /* Utility Classes */
+  /* Utility classes using tokens */
   .text-muted {
     color: var(--color-text-muted);
   }
@@ -193,5 +66,13 @@
   
   .border-default {
     border-color: var(--color-border);
+  }
+
+  /* Component base styles */
+  .card {
+    background-color: var(--color-surface);
+    border-radius: var(--rd-lg);
+    box-shadow: var(--shadow-card);
+    padding: var(--sp-4);
   }
 }
