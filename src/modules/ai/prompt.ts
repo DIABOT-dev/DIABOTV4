@@ -1,43 +1,10 @@
-import { UserContext } from './context';
-
-export type PromptTemplate = "coach_checkin" | "reminder_reason" | "safety_escalation" | "meal_feedback";
-
-interface PromptContent {
-  system: string;
-  user: string;
-}
-/**
- * Kiểm tra số đo có nguy hiểm không
- */
-function isDangerous(context: UserContext): boolean {
-  const { metrics } = context;
-  
-  // BG nguy hiểm: <70 hoặc >300 mg/dL
-  if (metrics.bg_latest) {
-    const bg = metrics.bg_latest.value;
-    if (bg < 70 || bg > 300) return true;
-  }
-
-  // BP nguy hiểm: SYS >180 hoặc DIA >110
-  if (metrics.bp_latest) {
-    const { systolic, diastolic } = metrics.bp_latest;
-    if (systolic > 180 || diastolic > 110) return true;
-  }
-
-  return false;
-}
+import type { AIContext } from './types';
 
 /**
  * Template cho coach check-in thường ngày
  */
-export function getCoachCheckinTemplate(context: UserContext): PromptContent {
-  // Kiểm tra safety trước
-  if (isDangerous(context)) {
-    return getSafetyEscalationTemplate(context);
-  }
-
-  return {
-    system: `Bạn là trợ lý sức khỏe DIABOT, chuyên hỗ trợ người bệnh tiểu đường.
+export function coach_checkin(context: AIContext): string {
+  return `Bạn là trợ lý sức khỏe DIABOT, chuyên hỗ trợ người bệnh tiểu đường.
 
 NGUYÊN TẮC QUAN TRỌNG:
 - KHÔNG chẩn đoán bệnh
@@ -48,201 +15,81 @@ NGUYÊN TẮC QUAN TRỌNG:
 
 PHONG CÁCH:
 - Thân thiện, động viên
-- Ngắn gọn, dễ hiểu
+- Ngắn gọn, dễ hiểu (1-2 câu)
 - Tập trung vào hành động cụ thể
 - Sử dụng emoji phù hợp
 
 DỮ LIỆU NGƯỜI DÙNG:
-${context.summary}`,
+${context.summary}
 
-    user: `Hãy đưa ra lời khuyên ngắn gọn dựa trên dữ liệu sức khỏe của tôi. Tập trung vào:
-1. Nhận xét tích cực về những gì tôi đã làm tốt
-2. Gợi ý cải thiện cụ thể cho ngày hôm nay
-3. Nhắc nhở theo dõi nếu thiếu dữ liệu
-
-Trả lời trong 2-3 câu, thân thiện và động viên.`
-  };
+Hãy đưa ra 1-2 việc cụ thể người dùng nên làm hôm nay để cải thiện sức khỏe. Trả lời ngắn gọn, thân thiện.`;
 }
 
 /**
  * Template cho nhắc nhở với lý do
  */
-export function getReminderReasonTemplate(context: UserContext, reminderType: 'bg' | 'water' | 'weight' | 'bp' | 'insulin'): PromptContent {
-  const reminderMap = {
-    bg: 'đo đường huyết',
-    water: 'uống nước',
-    weight: 'cân nặng',
-    bp: 'đo huyết áp',
-    insulin: 'ghi liều insulin'
-  };
-
-  return {
-    system: `Bạn là trợ lý DIABOT, tạo lời nhắc nhở thân thiện.
+export function reminder_reason(context: AIContext, message: string): string {
+  return `Bạn là trợ lý DIABOT, giải thích lý do nhắc nhở.
 
 NGUYÊN TẮC:
-- Giải thích TẠI SAO việc ${reminderMap[reminderType]} quan trọng
+- Giải thích TẠI SAO việc này quan trọng
 - Động viên, không áp lực
 - Đưa ra lợi ích cụ thể
-- Ngắn gọn, dễ hiểu
+- Ngắn gọn (1-2 câu)
 
 DỮ LIỆU NGƯỜI DÙNG:
-${context.summary}`,
+${context.summary}
 
-    user: `Tạo lời nhắc nhở ${reminderMap[reminderType]} với lý do cụ thể dựa trên dữ liệu của tôi. 
-Giải thích tại sao việc này quan trọng cho sức khỏe của tôi ngay bây giờ.
-Trả lời trong 1-2 câu, thân thiện và có động lực.`
-  };
+NGƯỜI DÙNG HỎI: ${message}
+
+Hãy giải thích tại sao việc này quan trọng cho sức khỏe của họ. Trả lời ngắn gọn, thân thiện.`;
 }
 
 /**
  * Template cho tình huống nguy hiểm - chuyển hướng y tế
  */
-export function getSafetyEscalationTemplate(context: UserContext): PromptContent {
-  return {
-    system: `Bạn là trợ lý DIABOT trong tình huống khẩn cấp sức khỏe.
-
-NHIỆM VỤ DUY NHẤT:
-- Khuyên người dùng liên hệ bác sĩ NGAY LẬP TỨC
-- KHÔNG tự đưa ra lời khuyên y tế
-- KHÔNG giải thích chi tiết về tình trạng
-- Tập trung vào hành động cần làm ngay
-
-DỮ LIỆU NGUY HIỂM PHÁT HIỆN:
-${context.summary}`,
-
-    user: `Số đo sức khỏe của tôi có dấu hiệu bất thường. Hãy khuyên tôi nên làm gì ngay bây giờ.
-Trả lời ngắn gọn, tập trung vào việc liên hệ y tế, không giải thích chi tiết tình trạng.`
-  };
+export function safety_escalation(reason: string): string {
+  return `⚠️ Chỉ số sức khỏe bất thường được phát hiện. ${reason} Vui lòng liên hệ bác sĩ hoặc cơ sở y tế gần nhất để được tư vấn kịp thời. DIABOT không thể thay thế lời khuyên y tế chuyên nghiệp.`;
 }
 
 /**
- * Router chọn template phù hợp
+ * Kiểm tra số đo có nguy hiểm không
  */
-export function selectPromptTemplate(
-  context: UserContext, 
-  intent: string,
-  reminderType?: 'bg' | 'water' | 'weight' | 'bp' | 'insulin'
-): PromptContent {
-  // Ưu tiên safety check
-  if (isDangerous(context)) {
-    return getSafetyEscalationTemplate(context);
-  }
-
-  // Reminder với lý do
-  if (intent === 'reminder' && reminderType) {
-    return getReminderReasonTemplate(context, reminderType);
-  }
-
-  // Meal feedback
-  if (intent === 'meal_feedback') {
-    return getMealFeedbackTemplate(context);
-  }
-
-  // Default: coach check-in
-  return getCoachCheckinTemplate(context);
-}
-
-/**
- * Template cho phản hồi về bữa ăn
- */
-export function getMealFeedbackTemplate(context: UserContext): PromptContent {
-  return {
-    system: `Bạn là trợ lý dinh dưỡng DIABOT, chuyên tư vấn bữa ăn cho người tiểu đường.
-
-NGUYÊN TẮC QUAN TRỌNG:
-- KHÔNG chẩn đoán bệnh
-- KHÔNG kê đơn thuốc  
-- KHÔNG thay thế bác sĩ dinh dưỡng
-- CHỈ đưa ra gợi ý thực đơn an toàn
-- Tập trung vào cân bằng carb, protein, chất xơ
-
-PHONG CÁCH:
-- Thực tế, dễ áp dụng
-- Ngắn gọn, cụ thể
-- Khuyến khích thói quen tốt
-
-DỮ LIỆU NGƯỜI DÙNG:
-${context.summary}`,
-
-    user: `Hãy đưa ra gợi ý về bữa ăn dựa trên dữ liệu sức khỏe của tôi. Tập trung vào:
-1. Món ăn phù hợp với đường huyết hiện tại
-2. Cân bằng dinh dưỡng cho người tiểu đường
-3. Dễ chuẩn bị và thực hiện
-
-Trả lời trong 2-3 câu, thực tế và hữu ích.`
-  };
-}
-
-/**
- * Đánh giá mức độ an toàn của AI response
- */
-export function guardrails(output: string): 'low' | 'medium' | 'high' {
-  const dangerous = [
-    'chẩn đoán', 'bệnh', 'thuốc', 'liều', 'insulin', 'metformin',
-    'điều trị', 'khám', 'bác sĩ nói', 'tôi nghĩ bạn bị'
-  ];
+export function validateSafety(context: AIContext, message: string): { escalate: false } | { escalate: true; text: string; reason: string; kind: "bg" | "bp" } {
+  const { metrics } = context;
   
-  const medical = [
-    'nên gặp bác sĩ', 'tham khảo y tế', 'kiểm tra sức khỏe',
-    'theo dõi chặt chẽ', 'cần chú ý'
-  ];
-
-  const lower = output.toLowerCase();
+  // Parse message để tìm số đo nguy hiểm
+  const bgMatch = message.match(/(?:bg|đường|glucose)[^\d]*(\d{2,3})/i);
+  const bpMatch = message.match(/(\d{2,3})\s*\/\s*(\d{2,3})/);
   
-  // High risk: chứa từ nguy hiểm
-  if (dangerous.some(word => lower.includes(word))) {
-    return 'high';
-  }
-  
-  // Medium risk: chứa từ y tế
-  if (medical.some(word => lower.includes(word))) {
-    return 'medium';
-  }
-  
-  // Low risk: an toàn
-  return 'low';
-}
-/**
- * Render prompt với variables - trả về string
- */
-export function renderPrompt(intent: string, variables?: Record<string, any>): string {
-  const templateId = intent as PromptTemplate;
-  
-  // Build context từ variables
-  const context = variables?.context_json || {
-    summary: 'Không có dữ liệu người dùng.',
-    metrics: { logs_count_7d: { glucose: 0, water: 0, weight: 0, bp: 0, insulin: 0 } }
-  };
-
-  // Chọn template content
-  let template: PromptContent;
-  switch (templateId) {
-    case 'reminder_reason':
-      template = getReminderReasonTemplate(context, variables?.reminder_type || 'bg');
-      break;
-    case 'safety_escalation':
-      template = getSafetyEscalationTemplate(context);
-      break;
-    case 'meal_feedback':
-      template = getMealFeedbackTemplate(context);
-      break;
-    case 'coach_checkin':
-    default:
-      template = getCoachCheckinTemplate(context);
-      break;
+  // BG nguy hiểm: <70 hoặc >300 mg/dL
+  const checkBG = bgMatch ? parseInt(bgMatch[1]) : metrics.latest?.bg;
+  if (checkBG && (checkBG < 70 || checkBG > 300)) {
+    const reason = checkBG < 70 
+      ? `Đường huyết thấp (${checkBG} mg/dL).`
+      : `Đường huyết cao (${checkBG} mg/dL).`;
+    return {
+      escalate: true,
+      kind: "bg",
+      reason,
+      text: safety_escalation(reason)
+    };
   }
 
-  // Combine system + user thành string
-  let combined = `${template.system}\n\nUser: ${template.user}`;
-  
-  // Thay thế variables nếu có
-  if (variables) {
-    Object.entries(variables).forEach(([key, value]) => {
-      const placeholder = `{{${key}}}`;
-      const valueStr = typeof value === 'string' ? value : JSON.stringify(value);
-      combined = combined.replace(new RegExp(placeholder, 'g'), valueStr);
-    });
+  // BP nguy hiểm: SYS >180 hoặc DIA >110
+  const checkBP = bpMatch 
+    ? { sys: parseInt(bpMatch[1]), dia: parseInt(bpMatch[2]) }
+    : metrics.latest?.bp;
+    
+  if (checkBP && (checkBP.sys > 180 || checkBP.dia > 110)) {
+    const reason = `Huyết áp cao (${checkBP.sys}/${checkBP.dia} mmHg).`;
+    return {
+      escalate: true,
+      kind: "bp", 
+      reason,
+      text: safety_escalation(reason)
+    };
   }
 
-  return combined;
+  return { escalate: false };
 }

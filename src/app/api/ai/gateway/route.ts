@@ -1,18 +1,15 @@
 // src/app/api/ai/gateway/route.ts
 import { NextResponse } from "next/server";
 import { buildContext } from "@/modules/ai/context";
-import { renderPrompt, guardrails } from "@/modules/ai/prompt";
-import { routeIntent } from "@/ai/router/RouterPolicy";
+import { coach_checkin, reminder_reason, validateSafety } from "@/modules/ai/prompt";
+import { routeModel, generate } from "@/modules/ai/models";
 import { checkIdempotent, saveIdempotent } from "@/ai/utils/idempotency";
-import { makeKey, getCache, setCache } from "@/ai/utils/cache";
-import { generateWithOpenAI } from "@/ai/providers/OpenAIProvider";
-import { logAI } from "@/ai/observability/logger";
+import type { Intent } from "@/modules/ai/types";
 
 type GatewayBody = {
   user_id: string;
-  intent: string;
+  intent: Intent;
   message?: string;
-  vars?: Record<string, any>;
 };
 
 function safeJsonParse(text: string) {
@@ -29,8 +26,6 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const t0 = Date.now();
-  let cacheHit = false;
-  let idempHit = false;
 
   try {
     const idempKey = req.headers.get("Idempotency-Key") || "";
@@ -59,77 +54,68 @@ export async function POST(req: Request) {
       );
     }
 
-    // 1) Idempotency
+    // 1) Idempotency check
     const prev = checkIdempotent(idempKey);
     if (prev) {
-      idempHit = true;
       return NextResponse.json(prev);
     }
 
-    // 2) Routing
-    const decision = routeIntent(body.intent as any);
-
-    // 3) Context (5’ cache trong context.ts)
+    // 2) Build context (5' cache)
     const ctx = await buildContext(body.user_id);
 
-    // 4) Cache theo input thô + model (TRƯỚC khi renderPrompt cho rẻ)
-    const cacheKey = makeKey({
-      intent: body.intent,
-      message: body.message ?? "",
-      vars: body.vars ?? {},
-      model: decision.model,
-      user_id: body.user_id, // tách cache theo user cho chắc
-    });
-    const cached = getCache(cacheKey, decision.cacheTtlSec);
-    if (cached) {
-      cacheHit = true;
-      return NextResponse.json(cached);
+    // 3) Safety check
+    const safety = validateSafety(ctx, body.message || "");
+    if (safety.escalate) {
+      const response = {
+        request_id: crypto.randomUUID(),
+        ts: Date.now(),
+        model: "safety",
+        tokens: 0,
+        output: safety.text,
+        safety: "high",
+        idempotency_key: idempKey || null,
+      };
+      
+      if (idempKey) saveIdempotent(idempKey, response);
+      return NextResponse.json(response);
     }
 
-    // 5) Render prompt
-    const prompt: string = renderPrompt(body.intent, {
-      message: body.message || "",
-      context_json: ctx,
-      ...body.vars,
+    // 4) Route model & generate prompt
+    const model = routeModel(body.intent);
+    let prompt: string;
+    
+    switch (body.intent) {
+      case "reminder_reason":
+        prompt = reminder_reason(ctx, body.message || "");
+        break;
+      case "coach_checkin":
+      default:
+        prompt = coach_checkin(ctx);
+        break;
+    }
+
+    // 5) Generate response
+    const result = await generate({
+      model,
+      prompt,
+      maxTokens: 120,
+      intent: body.intent,
+      context: ctx,
+      message: body.message
     });
-
-    // 6) Gọi model thật nếu không bật STUB
-    const useStub = process.env.USE_STUB === "1" || !process.env.OPENAI_API_KEY;
-    const modelOutput = useStub
-      ? `[${decision.model}] ${prompt.slice(0, 180)}…`
-      : await generateWithOpenAI({
-          model: decision.model,
-          temperature: decision.temperature,
-          prompt,
-        });
-
-    // 7) Guardrails
-    const safety = guardrails(modelOutput);
 
     const response = {
       request_id: crypto.randomUUID(),
       ts: Date.now(),
-      model: decision.model,
-      tokens: 0, // (tuỳ bạn tính nếu dùng SDK)
-      output: modelOutput,
-      safety,
+      model,
+      tokens: result.usage?.total_tokens || 0,
+      output: result.text,
+      safety: "low",
       idempotency_key: idempKey || null,
     };
 
-    // 8) Save cache & idempotency
-    if (decision.cacheTtlSec > 0) setCache(cacheKey, response);
+    // 6) Save idempotency
     if (idempKey) saveIdempotent(idempKey, response);
-
-    // 9) Log
-    logAI({
-      ts: t0,
-      user_id: body.user_id,
-      intent: body.intent,
-      model: decision.model,
-      latency_ms: Date.now() - t0,
-      cache_hit: cacheHit,
-      idempotency_hit: idempHit,
-    });
 
     return NextResponse.json(response);
   } catch (err: any) {
