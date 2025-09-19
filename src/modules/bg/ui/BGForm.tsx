@@ -43,7 +43,8 @@ export function BGForm() {
     if (!result.valid) {
       // ghép chuỗi lỗi ngắn gọn cho người dùng
       const msg =
-        (result.errors && result.errors.join(", ")) ||
+        ((result as any).errors && (result as any).errors.join(", ")) ||
+        ((result as any).message) ||
         "Dữ liệu chưa hợp lệ. Vui lòng kiểm tra lại.";
       setToast(msg);
       return;

@@ -7,7 +7,7 @@ export class SaveInsulinLog {
 
   async execute(dto: SaveInsulinLogDTO): Promise<SaveResult> {
     const v = validateInsulinDTO(dto);
-    if (!v.valid) return { ok: false, status: 400, error: v.message };
+    if (!v.valid) return { ok: false, status: 400, error: (v as any).message };
 
     const t0 = (typeof performance !== "undefined" ? performance.now() : Date.now());
     const res = await this.repo.save(dto);

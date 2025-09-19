@@ -8,7 +8,7 @@ export class SaveBGLog {
 
   async execute(dto: BGLogDTO): Promise<SaveResult> {
     const v = validateBG(dto);
-    if (!v.valid) return { ok: false, status: 400, error: v.message };
+    if (!v.valid) return { ok: false, status: 400, error: (v as any).message };
 
     // latency metric (optional)
     const t0 = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();

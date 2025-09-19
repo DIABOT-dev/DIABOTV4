@@ -11,4 +11,9 @@ export class MenuRepo {
     const day = (src.days as DayMenu[]).find(d => d.day_of_week === day_of_week);
     return day ?? null;
   }
+
+  // Alias for compatibility
+  async getMenuForDay(day_of_week: number, level: "basic"|"performance"): Promise<DayMenu | null> {
+    return this.getMenuForDayOfWeek(day_of_week, level);
+  }
 }

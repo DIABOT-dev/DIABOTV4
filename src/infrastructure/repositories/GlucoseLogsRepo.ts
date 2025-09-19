@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { supabaseAdmin } from "@/lib/db";
+import { supabaseAdmin } from "@/lib/supabase/serverClient";
 import { getUserId } from "@/lib/auth/getUserId";
 import { format, startOfDay, endOfDay } from "date-fns";
 
@@ -84,5 +84,34 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     console.error("ETL Daily error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+// Export class for imports
+export class GlucoseLogsRepo {
+  async listByRange(userId: string, startTime: string, endTime: string) {
+    const sb = supabaseAdmin();
+    const { data, error } = await sb
+      .from("glucose_logs")
+      .select("*")
+      .eq("user_id", userId)
+      .gte("taken_at", startTime)
+      .lte("taken_at", endTime)
+      .order("taken_at", { ascending: false });
+    
+    if (error) throw new Error(`Failed to get glucose logs: ${error.message}`);
+    return data || [];
+  }
+
+  async create(log: any) {
+    const sb = supabaseAdmin();
+    const { data, error } = await sb
+      .from("glucose_logs")
+      .insert(log)
+      .select()
+      .single();
+    
+    if (error) throw new Error(`Failed to create glucose log: ${error.message}`);
+    return data;
   }
 }

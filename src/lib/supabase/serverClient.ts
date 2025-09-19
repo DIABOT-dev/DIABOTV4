@@ -11,4 +11,5 @@ export function serverSupabase(): SupabaseClient {
   return _sb;
 }
 
-export const supabaseAdmin = serverSupabase(); // alias quen dùng
+export const supabaseAdmin = serverSupabase; // function alias
+export const sbServer = serverSupabase; // alias for compatibility

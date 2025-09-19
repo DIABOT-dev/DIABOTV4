@@ -48,3 +48,10 @@ export interface TimelineVM {
   groups: TimelineGroup[];
   nextCursor?: string | null;
 }
+
+export interface SnapshotVM {
+  avg_bg?: number | null;
+  total_water?: number | null;
+  weight_last?: number | null;
+  bp_recent?: { s: number; d: number; ts: string } | null;
+}
