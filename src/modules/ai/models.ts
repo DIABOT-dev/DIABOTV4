@@ -1,10 +1,10 @@
 import OpenAI from "openai";
 import { generateMock } from "./dev/mockModel";
-import type { AIContext, Intent } from "./types";
+import { Intent } from "./types";
 
-export function routeModel(intent: Intent): string {
+export function routeModel(intent: Intent) {
   switch (intent) {
-    case "classify_intent":
+    case "classify":
     case "detect_intent":
       return "gpt-5-nano";
     default:
@@ -12,46 +12,40 @@ export function routeModel(intent: Intent): string {
   }
 }
 
-const client = process.env.OPENAI_API_KEY 
-  ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
-  : null;
+const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
 
 export async function generate(opts: {
   model: string;
   system?: string;
   prompt: string;
   maxTokens?: number;
-  intent?: Intent;
-  context?: AIContext;
-  message?: string;
 }) {
-  const { model, system, prompt, maxTokens = 120, intent, context, message } = opts;
+  const { model, system, prompt, maxTokens = 160 } = opts;
 
-  // Check if using mock transport
-  if (process.env.LLM_TRANSPORT === 'mock' && intent && context) {
-    return await generateMock({ intent, ctx: context, message });
+  // Nếu mock thì trả kết quả ảo, không gọi OpenAI
+  if (process.env.LLM_TRANSPORT === "mock") {
+    return generateMock({ intent: "coach_checkin", ctx: {} as any, message: prompt });
   }
 
-  // Require OpenAI client for real calls
-  if (!client) {
-    throw new Error('OpenAI client not configured. Set OPENAI_API_KEY or use LLM_TRANSPORT=mock');
-  }
+  const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
+    ...(system ? [{ role: "system" as const, content: system }] : []),
+    { role: "user" as const, content: prompt },
+  ];
 
-  // Giữ chi phí thấp & câu ngắn gọn
   const res = await client.chat.completions.create({
     model,
     temperature: 0.2,
     max_tokens: maxTokens,
-    messages: [
-      ...(system ? [{ role: "system", content: system }] : []),
-      { role: "user" as const, content: prompt }
-    ],
+    messages,
   });
 
   const text = res.choices[0]?.message?.content?.trim() || "";
-  // usage có thể undefined với một số model
   const usage = res.usage
-    ? { prompt_tokens: res.usage.prompt_tokens, completion_tokens: res.usage.completion_tokens, total_tokens: res.usage.total_tokens }
+    ? {
+        prompt_tokens: res.usage.prompt_tokens,
+        completion_tokens: res.usage.completion_tokens,
+        total_tokens: res.usage.total_tokens,
+      }
     : undefined;
 
   return { text, usage };
