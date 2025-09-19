@@ -1,10 +1,10 @@
 // src/modules/bg/domain/validators.ts
-import type { SaveBGLogDTO } from "./types";
+import type { BGLogDTO } from "./types";
 
 const UNIT = new Set(["mg/dL","mmol/L"]);
 const CONTEXT = new Set(["before","after2h","random"]);
 
-export function validateBG(dto: SaveBGLogDTO): { valid: true } | { valid: false; message: string } {
+export function validateBG(dto: BGLogDTO): { valid: true } | { valid: false; message: string; errors?: string[] } {
   if (!dto || typeof dto !== "object") {
     return { valid: false, message: "Thiếu dữ liệu ghi BG." };
   }

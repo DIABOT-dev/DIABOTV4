@@ -21,12 +21,3 @@ export async function requireAuth(req?: NextRequest): Promise<string> {
   }
   return userId;
 }
-
-/** Require authentication - throw if not authenticated */
-export async function requireAuth(req?: NextRequest): Promise<string> {
-  const userId = getUserId(req);
-  if (!userId) {
-    throw new Error("Authentication required");
-  }
-  return userId;
-}

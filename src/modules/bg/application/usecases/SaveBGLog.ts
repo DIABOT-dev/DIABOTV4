@@ -1,12 +1,12 @@
 // src/modules/bg/application/usecases/SaveBGLog.ts
-import type { SaveBGLogDTO, SaveResult } from "../../domain/types";
+import type { BGLogDTO, SaveResult } from "../../domain/types";
 import { validateBG } from "../../domain/validators";
-import type { BGRepo } from "../../infrastructure/adapters/BGRepo.supabase";
+import type { BGRepo } from "../ports/BGRepo";
 
 export class SaveBGLog {
   constructor(private repo: BGRepo) {}
 
-  async execute(dto: SaveBGLogDTO): Promise<SaveResult> {
+  async execute(dto: BGLogDTO): Promise<SaveResult> {
     const v = validateBG(dto);
     if (!v.valid) return { ok: false, status: 400, error: v.message };
 

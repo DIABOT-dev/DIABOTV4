@@ -1,10 +1,7 @@
 // src/modules/bg/infrastructure/adapters/BGRepo.supabase.ts
-import { createClient, SupabaseClient } from "@supabase/supabase-js";
-import type { SaveBGLogDTO, SaveResult } from "../../domain/types";
-
-export interface BGRepo {
-  save(dto: SaveBGLogDTO): Promise<SaveResult>;
-}
+import { supabase } from "@/lib/supabase/client";
+import type { BGLogDTO, SaveResult } from "../../domain/types";
+import type { BGRepo } from "../../application/ports/BGRepo";
 
 // Convert mmol/L -> mg/dL (rounded)
 function mmolToMgdl(v: number) {
@@ -30,24 +27,14 @@ function getDevUserId(): string | null {
 }
 
 // tag mapping for legacy schema (glucose_logs.tag)
-const TAG_MAP: Record<SaveBGLogDTO["context"], string> = {
-  before: "before",
-  after2h: "after2h",
+const TAG_MAP: Record<BGLogDTO["context"], string> = {
+  before: "before_meal",
+  after2h: "after_meal", 
   random: "random",
 };
 
 export class BGRepoSupabase implements BGRepo {
-  private sb: SupabaseClient;
-  constructor(sb?: SupabaseClient) {
-    this.sb =
-      sb ??
-      createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      );
-  }
-
-  async save(dto: SaveBGLogDTO): Promise<SaveResult> {
+  async save(dto: BGLogDTO): Promise<SaveResult> {
     // Resolve profile/user id; replace with real auth session in production
     const user_id = dto.profile_id ?? getDevUserId();
     if (!user_id) {
@@ -62,7 +49,7 @@ export class BGRepoSupabase implements BGRepo {
       taken_at: dto.taken_at,           // ISO string
     };
 
-    const { data, error, status } = await this.sb
+    const { data, error, status } = await supabase
       .from("glucose_logs")             // change if your table name differs
       .insert(payload)
       .select("id")
