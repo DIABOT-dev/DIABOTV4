@@ -35,7 +35,7 @@ export async function generate(opts: {
     max_tokens: maxTokens,
     messages: [
       ...(system ? [{ role: "system", content: system }] : []),
-      { role: "user" as const, content: prompt },
+      { role: "user" as const, content: prompt }
     ],
   });
 
