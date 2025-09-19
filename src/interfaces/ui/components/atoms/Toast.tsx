@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 
 interface ToastProps {
   message: string;
-  type?: 'success' | 'danger';
+  type?: 'success' | 'error' | 'danger';
   duration?: number;
   onClose?: () => void;
   'data-testid'?: string;
@@ -33,7 +33,10 @@ export default function Toast({
 
   return (
     <div 
-      className={cn('toast', `toast-${type}`)}
+      className={cn(
+        'toast',
+        type === 'error' ? 'toast-danger' : `toast-${type}`
+      )}
       data-testid={testId}
     >
       {message}

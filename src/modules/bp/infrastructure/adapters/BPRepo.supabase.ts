@@ -1,8 +1,9 @@
 // src/modules/bp/infrastructure/adapters/BPRepo.supabase.ts
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
-import { BPLog } from "../../domain/types";
-
-// 🔧 Hotfix: dùng createClient trực tiếp, bỏ alias "@/lib/supabase"
+// Unified Supabase client
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey);
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey);
@@ -34,5 +35,3 @@ export const BPRepo = {
 
     if (error) throw error;
     return data;
-  },
-};

@@ -1,12 +1,9 @@
-// ❌ BỎ: import { supabase } from "@/lib/supabase";
-
-// ✅ THÊM:
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { WeightLogDTO } from "../../domain/types";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey);
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey);
 
 export const WeightRepo = {
   async insert(dto: WeightLogDTO) {
