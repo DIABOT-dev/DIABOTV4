@@ -1,0 +1,46 @@
+# SAFETY RAIL — DIABOT V4 (KHÔNG ĐỤNG UI/UX)
+
+❌ TUYỆT ĐỐI KHÔNG SỬA/XOÁ:
+- src/interfaces/ui/screens/Dashboard.tsx
+- src/interfaces/ui/styles/globals.css
+- src/app/layout.tsx
+- TẤT CẢ tokens.css, tailwind.config.{js,ts}
+- TẤT CẢ form đã hoàn thiện (BG/Water/Insulin/…)
+=> Nếu cần sửa các file trên: DỪNG, liệt kê lý do và CHỜ TÔI DUYỆT.
+
+✅ CHỈ ĐƯỢC PHÉP SỬA (nền tảng để chạy AI):
+1) Fix import alias:
+   - src/modules/bp/infrastructure/adapters/BPRepo.supabase.ts
+   - src/modules/weight/infrastructure/adapters/WeightRepo.supabase.ts
+   => Chuẩn hoá direct import tới src/lib/supabase/client
+
+2) Tạo unified Supabase client:
+   - src/lib/supabase/client.ts (single source of truth)
+
+3) Hoàn thiện component tối thiểu (nếu thiếu):
+   - src/interfaces/ui/components/atoms/Toast.tsx (success/error)
+   - src/interfaces/ui/components/atoms/Input.tsx (size variants)
+   - (Chỉ 2 file này, KHÔNG chỉnh các component/atoms khác)
+
+4) (TÙY CHỌN, CHỈ KHI CẦN) helper nhỏ:
+   - src/lib/utils.ts  (thêm hàm thuần cho AI; không được import UI)
+
+5) Tạo placeholder AI Gateway:
+   - src/app/api/ai/gateway/route.ts (Next.js)
+   - Chỉ stub: nhận {idempotency_key,user_id,intent,message} → 200 "OK: stub"
+
+⚙️ QUY TRÌNH THỰC HIỆN BẮT BUỘC
+- Bước 0: TRƯỚC KHI GHI FILE → Xuất danh sách file sẽ sửa (diff preview ngắn).
+- Bước 1: Chờ tôi CONFIRM, rồi mới ghi.
+- Bước 2: Sau khi ghi → In checklist test nhanh (node scripts hoặc curl).
+
+🧪 KIỂM THỬ SAU KHI SỬA
+- Build không lỗi import.
+- curl POST /api/ai/gateway trả 200 "OK: stub".
+- Toast hiển thị lỗi/thành công (demo story/preview).
+- KHÔNG có thay đổi trong Dashboard.tsx, globals.css, layout, tokens, tailwind.
+
+📦 BÀN GIAO
+- Danh sách file đã sửa.
+- Mã nguồn + ghi chú 1–2 dòng mỗi thay đổi.
+- Lệnh test cURL và npm script (nếu có).
