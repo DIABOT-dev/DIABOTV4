@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 
 export default function Chat() {
   const router = useRouter();
-  const sp = useSearchParams();
+  const sp = useSearchParams() || new URLSearchParams();
   const flow = sp.get("flow") || "welcome";
 
   const blocks: Record<string, any[]> = {

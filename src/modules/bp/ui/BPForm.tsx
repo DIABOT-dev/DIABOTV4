@@ -33,7 +33,7 @@ export function BPForm() {
     const dto: BPLog = {
       systolic: Number(systolic),
       diastolic: Number(diastolic),
-      pulse: pulse ? Number(pulse) : null, // 👈 TRUYỀN PULSE Ở ĐÂY
+      pulse: pulse ? Number(pulse) : undefined,
       taken_at: new Date(takenAt).toISOString(),
     };
 

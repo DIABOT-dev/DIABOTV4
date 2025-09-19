@@ -1,15 +1,12 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
-let _sb: SupabaseClient | null = null;
+let _instance: SupabaseClient | null = null;
 
-export function serverSupabase(): SupabaseClient {
-  if (_sb) return _sb;
+export function createServerSupabase(): SupabaseClient {
+  if (_instance) return _instance;
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
   if (!url || !key) throw new Error("Missing Supabase env");
-  _sb = createClient(url, key, { auth: { persistSession: false } });
-  return _sb;
+  _instance = createClient(url, key, { auth: { persistSession: false } });
+  return _instance;
 }
-
-export const supabaseAdmin = serverSupabase; // function alias
-export const sbServer = serverSupabase; // alias for compatibility

@@ -18,7 +18,7 @@ function getDevUserId(): string | null {
       // best-effort UUID
       const uuid = (typeof crypto !== "undefined" && "randomUUID" in crypto) ? (crypto as any).randomUUID() : `dev_${Math.random().toString(36).slice(2)}`;
       id = uuid;
-      window.localStorage.setItem(key, id);
+      window.localStorage.setItem(key, id ?? "");
     }
     return id;
   } catch {
