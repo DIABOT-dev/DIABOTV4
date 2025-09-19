@@ -1,10 +1,10 @@
-import { sbServer } from "@/lib/supabase/serverClient";
+import { supabaseAdmin } from "@/lib/db";
 import { BloodGlucoseRepository } from "@/application/ports/BloodGlucoseRepository";
 import { BloodGlucose } from "@/domain/entities/BloodGlucose";
 
 export class SupabaseBloodGlucoseRepository implements BloodGlucoseRepository {
   async create(entry: BloodGlucose): Promise<BloodGlucose> {
-    const supabase = sbServer();
+    const supabase = supabaseAdmin;
     const { data, error } = await supabase.from("bg_logs").insert({
       user_id: entry.userId,
       mgdl: entry.mgdl,

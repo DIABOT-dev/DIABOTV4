@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { supabaseAdmin } from "@/lib/supabase/serverClient";
+import { supabaseAdmin } from "@/lib/db";
 import { getUserId } from "@/lib/auth/getUserId";
 import { format, startOfDay, endOfDay } from "date-fns";
 
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
   const startTime = startOfDay(new Date(targetDay)).toISOString();
   const endTime = endOfDay(new Date(targetDay)).toISOString();
 
-  const sb = supabaseAdmin();
+  const sb = supabaseAdmin;
 
   try {
     // Aggregate glucose data
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
 // Export class for imports
 export class GlucoseLogsRepo {
   async listByRange(userId: string, startTime: string, endTime: string) {
-    const sb = supabaseAdmin();
+    const sb = supabaseAdmin;
     const { data, error } = await sb
       .from("glucose_logs")
       .select("*")
@@ -104,7 +104,7 @@ export class GlucoseLogsRepo {
   }
 
   async create(log: any) {
-    const sb = supabaseAdmin();
+    const sb = supabaseAdmin;
     const { data, error } = await sb
       .from("glucose_logs")
       .insert(log)

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { sbServer } from "@/lib/supabase/serverClient";
+import { supabaseAdmin } from "@/lib/db";
 
 const InsulinInput = z.object({
   userId: z.string().uuid(),
@@ -13,7 +13,7 @@ export async function handlePost(req: Request) {
   const body = await req.json();
   const input = InsulinInput.parse(body);
 
-  const sb = sbServer();
+  const sb = supabaseAdmin;
   const { data, error } = await sb
     .from("insulin_logs")
     .insert({

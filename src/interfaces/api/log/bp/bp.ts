@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { sbServer } from "@/lib/supabase/serverClient";
+import { supabaseAdmin } from "@/lib/db";
 
 const BPInput = z.object({
   userId: z.string().uuid(),
@@ -14,7 +14,7 @@ export async function handlePost(req: Request) {
   const body = await req.json();
   const input = BPInput.parse(body);
 
-  const sb = sbServer();
+  const sb = supabaseAdmin;
   const { data, error } = await sb
     .from("bp_logs")
     .insert({
