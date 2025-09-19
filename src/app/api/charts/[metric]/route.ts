@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/db";
+import { supabaseAdmin } from "@/lib/supabase/client";
 import { getUserId } from "@/lib/auth/getUserId";
 import { addDays } from "date-fns";
 

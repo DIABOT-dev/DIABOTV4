@@ -19,6 +19,9 @@ export function getSupabase(): SupabaseClient {
 // Export const để code mới dùng: supabase.from()
 export const supabase = getSupabase();
 
+// Backward compatibility - code cũ gọi supabase() vẫn chạy
+export default getSupabase;
+
 // Admin client cho server-side operations
 export const supabaseAdmin = () => {
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;

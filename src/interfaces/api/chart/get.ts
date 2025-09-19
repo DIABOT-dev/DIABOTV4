@@ -10,7 +10,7 @@
 
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getSupabase } from "@/lib/supabase/client";
+import { supabase } from "@/lib/supabase/client";
 
 const ChartQueryInput = z.object({
   metric: z.enum(["avg_bg", "total_water", "weight", "bp", "meals"]),
@@ -30,11 +30,10 @@ type MetricDayRow = {
   meals?: number | null;
 };
 
-export async function GET(req: Request) {
+export async function handleGet(req: Request, metric: string) {
   try {
     // --- Parse & validate input ---
     const { searchParams } = new URL(req.url);
-    const metric = (searchParams.get("metric") || "") as any;
     const range = ((searchParams.get("range") as "7d" | "30d") || "7d") as any;
     const userId = searchParams.get("userId") || "";
 
@@ -46,9 +45,8 @@ export async function GET(req: Request) {
 
     // --- Đọc từ Chart DB (metrics_day) ---
     // Lưu ý: UI Chart chỉ đọc từ OLAP-lite theo spec V4
-    const supabase = getSupabase();
     const { data, error } = await supabase
-      .from<MetricDayRow>("metrics_day")
+      .from("metrics_day")
       .select(
         "profile_id,date,avg_bg,total_water,weight,bp_systolic,bp_diastolic,meals"
       )
@@ -64,7 +62,7 @@ export async function GET(req: Request) {
       );
     }
 
-    const rows = (data ?? []).map((r) => {
+    const rows = (data ?? []).map((r: any) => {
       // Chỉ giữ field cần cho metric được hỏi -> giảm payload
       switch (query.metric) {
         case "avg_bg":
