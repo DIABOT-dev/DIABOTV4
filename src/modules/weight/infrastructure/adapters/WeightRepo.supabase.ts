@@ -1,8 +1,9 @@
-import { supabase } from '@/lib/supabase/client';
+import { getSupabase } from '@/lib/supabase/client';
 import { WeightLogDTO } from "../../domain/types";
 
 export const WeightRepo = {
   async insert(dto: WeightLogDTO) {
+    const supabase = getSupabase();
     const { data, error } = await supabase
       .from("weight_logs")
       .insert({

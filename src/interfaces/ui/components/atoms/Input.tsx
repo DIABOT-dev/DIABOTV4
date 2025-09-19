@@ -2,13 +2,13 @@ import { InputHTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
-  size?: 'sm' | 'md' | 'lg';
+  inputSize?: 'sm' | 'md' | 'lg';
   variant?: 'default' | 'search';
   'data-testid'?: string;
 }
 
 export default function Input({ 
-  size = 'md', 
+  inputSize = 'md', 
   variant = 'default',
   className, 
   'data-testid': testId,
@@ -18,7 +18,7 @@ export default function Input({
     <input
       className={cn(
         'input',
-        `input-${size}`,
+        `input-${inputSize}`,
         variant === 'search' && 'pl-10',
         className
       )}

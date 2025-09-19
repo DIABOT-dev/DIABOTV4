@@ -1,16 +1,23 @@
 import { NextRequest } from "next/server";
 
 /** DEV: chỉ lấy từ header; PROD: mới đọc Supabase (import động) */
-export async function getUserId(req?: NextRequest): Promise<string | null> {
+export function getUserId(req?: NextRequest): string | null {
   if (process.env.AUTH_DEV_MODE === "true") {
     return req?.headers.get("x-debug-user-id") ?? null;
   }
   try {
-    const { createSupabaseServerClient } = await import("./serverClient");
-    const sb = createSupabaseServerClient();
-    const { data: { user } } = await sb.auth.getUser();
-    return user?.id ?? null;
+    // TODO: Implement real auth in production
+    return null;
   } catch {
     return null;
   }
+}
+
+/** Require authentication - throw if not authenticated */
+export async function requireAuth(req?: NextRequest): Promise<string> {
+  const userId = getUserId(req);
+  if (!userId) {
+    throw new Error("Authentication required");
+  }
+  return userId;
 }

@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
+    "target": "ES2017",
+    "downlevelIteration": true,
     "paths": {
       "@/*": [
         "./src/*"
@@ -19,6 +21,7 @@
       ]
     },
     "lib": [
+      "ES2017",
       "dom",
       "dom.iterable",
       "esnext"

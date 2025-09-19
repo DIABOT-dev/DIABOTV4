@@ -1,8 +1,9 @@
-    import { BPLog } from '../../domain/types';
-import { supabase } from '@/lib/supabase/client';
+import { BPLog } from '../../domain/types';
+import { getSupabase } from '@/lib/supabase/client';
 
 export const BPRepo = {
   async insert(dto: BPLog) {
+    const supabase = getSupabase();
     const { data, error } = await supabase
       .from("bp_logs")
       .insert({

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabaseAdmin } from "@/src/lib/db";
-import { getUserId } from "@/src/lib/auth/getUserId";
+import { supabaseAdmin } from "@/lib/db";
+import { getUserId } from "@/lib/auth/getUserId";
 import { addDays } from "date-fns";
 
 function startFromRange(range: string) {

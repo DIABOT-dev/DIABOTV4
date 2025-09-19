@@ -10,7 +10,7 @@
 
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { supabase } from "@/lib/supabase/client";
+import { getSupabase } from "@/lib/supabase/client";
 
 const ChartQueryInput = z.object({
   metric: z.enum(["avg_bg", "total_water", "weight", "bp", "meals"]),
@@ -46,7 +46,8 @@ export async function GET(req: Request) {
 
     // --- Đọc từ Chart DB (metrics_day) ---
     // Lưu ý: UI Chart chỉ đọc từ OLAP-lite theo spec V4
-    const { data, error } = await supabase()
+    const supabase = getSupabase();
+    const { data, error } = await supabase
       .from<MetricDayRow>("metrics_day")
       .select(
         "profile_id,date,avg_bg,total_water,weight,bp_systolic,bp_diastolic,meals"
