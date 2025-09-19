@@ -41,10 +41,10 @@ export async function generateMock(opts: {
         usage: { prompt_tokens: 35, completion_tokens: 28, total_tokens: 63 }
       };
 
-    case "classify":
+    case "classify_intent":
     case "detect_intent":
       return {
-        text: `Intent detected: ${intent}`,
+        text: "coach_checkin",
         usage: { prompt_tokens: 15, completion_tokens: 8, total_tokens: 23 }
       };
 
