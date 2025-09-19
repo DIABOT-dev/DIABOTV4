@@ -20,6 +20,9 @@
         "./src/interfaces/ui/styles/*"
       ]
     },
+    "types": [
+      "vitest/globals"
+    ],
     "lib": [
       "ES2017",
       "dom",
@@ -41,7 +44,8 @@
       {
         "name": "next"
       }
-    ]
+    ],
+    "strictNullChecks": true
   },
   "include": [
     "next-env.d.ts",
