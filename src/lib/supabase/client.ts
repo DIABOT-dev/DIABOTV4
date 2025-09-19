@@ -21,14 +21,3 @@ export const supabase = getSupabase();
 
 // Backward compatibility - code cũ gọi supabase() vẫn chạy
 export default getSupabase;
-
-// Admin client cho server-side operations
-export const supabaseAdmin = () => {
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-  return createClient(supabaseUrl, serviceRoleKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  });
-};
