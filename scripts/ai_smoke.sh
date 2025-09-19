@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # AI Gateway Smoke Test - Mock Mode (0 tokens)
 set -e
@@ -22,7 +22,8 @@ else
 fi
 
 # Step 2: Coach checkin
-echo -e "\n2️⃣ Coach checkin..."
+echo ""
+echo "2️⃣ Coach checkin..."
 COACH=$(curl -s -X POST "$GATEWAY" \
   -H "Content-Type: application/json" \
   -H "Idempotency-Key: smoke-coach" \
@@ -38,7 +39,8 @@ else
 fi
 
 # Step 3: Safety escalation (BG=320)
-echo -e "\n3️⃣ Safety escalation..."
+echo ""
+echo "3️⃣ Safety escalation..."
 SAFETY=$(curl -s -X POST "$GATEWAY" \
   -H "Content-Type: application/json" \
   -H "Idempotency-Key: smoke-safety" \
@@ -53,4 +55,5 @@ else
   exit 1
 fi
 
-echo -e "\n🎉 ALL SMOKE TESTS PASSED"
+echo ""
+echo "🎉 ALL SMOKE TESTS PASSED"
