@@ -1,7 +1,8 @@
 // src/app/api/ai/gateway/route.ts
 import { NextResponse } from "next/server";
 import { buildContext } from "@/modules/ai/context";
-import { coach_checkin, reminder_reason, validateSafety } from "@/modules/ai/prompt";
+import { coach_checkin, reminder_reason } from "@/modules/ai/prompt";
+import { validateSafety } from "@/modules/ai/guardrails";
 import { routeModel, generate } from "@/modules/ai/models";
 import { checkIdempotent, saveIdempotent } from "@/ai/utils/idempotency";
 import type { Intent } from "@/modules/ai/types";
@@ -13,10 +14,10 @@ type GatewayBody = {
 };
 
 function safeJsonParse(text: string) {
-  try { 
-    return { ok: true as const, data: JSON.parse(text) }; 
-  } catch (e: any) { 
-    return { ok: false as const, error: e?.message || "invalid_json" }; 
+  try {
+    return { ok: true as const, data: JSON.parse(text) };
+  } catch (e: any) {
+    return { ok: false as const, error: e?.message || "invalid_json" };
   }
 }
 
@@ -25,8 +26,6 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const t0 = Date.now();
-
   try {
     const idempKey = req.headers.get("Idempotency-Key") || "";
     const raw = await req.text();
@@ -75,15 +74,15 @@ export async function POST(req: Request) {
         safety: "high",
         idempotency_key: idempKey || null,
       };
-      
+
       if (idempKey) saveIdempotent(idempKey, response);
       return NextResponse.json(response);
     }
 
-    // 4) Route model & generate prompt
+    // 4) Route model & prompt
     const model = routeModel(body.intent);
     let prompt: string;
-    
+
     switch (body.intent) {
       case "reminder_reason":
         prompt = reminder_reason(ctx, body.message || "");
@@ -94,14 +93,14 @@ export async function POST(req: Request) {
         break;
     }
 
-    // 5) Generate response
+    // 5) Generate response (intent/context/message đã bỏ)
     const result = await generate({
       model,
       prompt,
       maxTokens: 120,
-      intent: body.intent as Intent,
-      context: ctx,
-      message: body.message
+      system:
+        "Bạn là trợ lý hỗ trợ thói quen an toàn cho người dùng tiểu đường. " +
+        "Tuyệt đối KHÔNG chẩn đoán, KHÔNG đưa liều thuốc, KHÔNG thay thế lời khuyên y tế.",
     });
 
     const response = {
@@ -119,7 +118,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json(response);
   } catch (err: any) {
-    // Log server-side, sanitize client response
     console.error("[AI Gateway Error]", err?.message || "unknown");
     return NextResponse.json(
       { error: "InternalError", message: "internal" },

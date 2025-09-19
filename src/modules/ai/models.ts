@@ -4,8 +4,7 @@ import { Intent } from "./types";
 
 export function routeModel(intent: Intent) {
   switch (intent) {
-    case "classify":
-    case "detect_intent":
+    case "detect_intent": // gộp luôn cho lightweight intent/classify
       return "gpt-5-nano";
     default:
       return "gpt-5-mini";
@@ -22,7 +21,7 @@ export async function generate(opts: {
 }) {
   const { model, system, prompt, maxTokens = 160 } = opts;
 
-  // Nếu mock thì trả kết quả ảo, không gọi OpenAI
+  // Mock mode để QA 0 token
   if (process.env.LLM_TRANSPORT === "mock") {
     return generateMock({ intent: "coach_checkin", ctx: {} as any, message: prompt });
   }
