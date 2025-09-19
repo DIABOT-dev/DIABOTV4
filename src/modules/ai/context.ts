@@ -1,6 +1,8 @@
 import { supabaseAdmin } from '@/lib/db';
 import type { AIContext, MetricPoint, BPPoint } from './types';
 
+export type { AIContext } from './types';
+
 // Cache cho context - 5 phút
 const contextCache = new Map<string, { data: AIContext; expires: number }>();
 const CACHE_TTL = 5 * 60 * 1000; // 5 phút

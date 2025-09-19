@@ -99,7 +99,7 @@ export async function POST(req: Request) {
       model,
       prompt,
       maxTokens: 120,
-      intent: body.intent,
+      intent: body.intent as Intent,
       context: ctx,
       message: body.message
     });

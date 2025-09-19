@@ -1,44 +1,15 @@
 import OpenAI from "openai";
 import { generateMock } from "./dev/mockModel";
-import type { AIContext } from "./types";
+import type { AIContext, Intent } from "./types";
 
-export type Intent =
-  | "greeting"
-  | "question"
-  | "request"
-  | "complaint"
-  | "compliment"
-  | "goodbye"
-  | "other";
-
-export function classifyIntent(message: string): Intent {
-  const lower = message.toLowerCase();
-  
-  if (lower.includes("hello") || lower.includes("hi") || lower.includes("hey")) {
-    return "greeting";
+export function routeModel(intent: Intent): string {
+  switch (intent) {
+    case "classify_intent":
+    case "detect_intent":
+      return "gpt-5-nano";
+    default:
+      return "gpt-5-mini";
   }
-  
-  if (lower.includes("?") || lower.startsWith("what") || lower.startsWith("how") || lower.startsWith("why")) {
-    return "question";
-  }
-  
-  if (lower.includes("please") || lower.includes("can you") || lower.includes("could you")) {
-    return "request";
-  }
-  
-  if (lower.includes("problem") || lower.includes("issue") || lower.includes("wrong")) {
-    return "complaint";
-  }
-  
-  if (lower.includes("thank") || lower.includes("great") || lower.includes("awesome")) {
-    return "compliment";
-  }
-  
-  if (lower.includes("bye") || lower.includes("goodbye") || lower.includes("see you")) {
-    return "goodbye";
-  }
-  
-  return "other";
 }
 
 const client = process.env.OPENAI_API_KEY 
