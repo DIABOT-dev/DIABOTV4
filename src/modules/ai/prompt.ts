@@ -1,10 +1,11 @@
 import { UserContext } from './context';
 
-export interface PromptTemplate {
+export type PromptTemplate = "coach_checkin" | "reminder_reason" | "safety_escalation" | "meal_feedback";
+
+interface PromptContent {
   system: string;
   user: string;
 }
-
 /**
  * Kiểm tra số đo có nguy hiểm không
  */
@@ -29,7 +30,7 @@ function isDangerous(context: UserContext): boolean {
 /**
  * Template cho coach check-in thường ngày
  */
-export function getCoachCheckinTemplate(context: UserContext): PromptTemplate {
+export function getCoachCheckinTemplate(context: UserContext): PromptContent {
   // Kiểm tra safety trước
   if (isDangerous(context)) {
     return getSafetyEscalationTemplate(context);
@@ -66,7 +67,7 @@ Trả lời trong 2-3 câu, thân thiện và động viên.`
 /**
  * Template cho nhắc nhở với lý do
  */
-export function getReminderReasonTemplate(context: UserContext, reminderType: 'bg' | 'water' | 'weight' | 'bp' | 'insulin'): PromptTemplate {
+export function getReminderReasonTemplate(context: UserContext, reminderType: 'bg' | 'water' | 'weight' | 'bp' | 'insulin'): PromptContent {
   const reminderMap = {
     bg: 'đo đường huyết',
     water: 'uống nước',
@@ -96,7 +97,7 @@ Trả lời trong 1-2 câu, thân thiện và có động lực.`
 /**
  * Template cho tình huống nguy hiểm - chuyển hướng y tế
  */
-export function getSafetyEscalationTemplate(context: UserContext): PromptTemplate {
+export function getSafetyEscalationTemplate(context: UserContext): PromptContent {
   return {
     system: `Bạn là trợ lý DIABOT trong tình huống khẩn cấp sức khỏe.
 
@@ -121,7 +122,7 @@ export function selectPromptTemplate(
   context: UserContext, 
   intent: string,
   reminderType?: 'bg' | 'water' | 'weight' | 'bp' | 'insulin'
-): PromptTemplate {
+): PromptContent {
   // Ưu tiên safety check
   if (isDangerous(context)) {
     return getSafetyEscalationTemplate(context);
@@ -144,7 +145,7 @@ export function selectPromptTemplate(
 /**
  * Template cho phản hồi về bữa ăn
  */
-export function getMealFeedbackTemplate(context: UserContext): PromptTemplate {
+export function getMealFeedbackTemplate(context: UserContext): PromptContent {
   return {
     system: `Bạn là trợ lý dinh dưỡng DIABOT, chuyên tư vấn bữa ăn cho người tiểu đường.
 
@@ -202,20 +203,46 @@ export function guardrails(output: string): 'low' | 'medium' | 'high' {
   return 'low';
 }
 /**
- * Render prompt với context thay thế
+ * Render prompt với variables - trả về string
  */
-export function renderPrompt(template: PromptTemplate, variables?: Record<string, string>): PromptTemplate {
-  if (!variables) return template;
+export function renderPrompt(intent: string, variables?: Record<string, any>): string {
+  const templateId = intent as PromptTemplate;
+  
+  // Build context từ variables
+  const context = variables?.context_json || {
+    summary: 'Không có dữ liệu người dùng.',
+    metrics: { logs_count_7d: { glucose: 0, water: 0, weight: 0, bp: 0, insulin: 0 } }
+  };
 
-  let system = template.system;
-  let user = template.user;
+  // Chọn template content
+  let template: PromptContent;
+  switch (templateId) {
+    case 'reminder_reason':
+      template = getReminderReasonTemplate(context, variables?.reminder_type || 'bg');
+      break;
+    case 'safety_escalation':
+      template = getSafetyEscalationTemplate(context);
+      break;
+    case 'meal_feedback':
+      template = getMealFeedbackTemplate(context);
+      break;
+    case 'coach_checkin':
+    default:
+      template = getCoachCheckinTemplate(context);
+      break;
+  }
 
-  // Thay thế variables trong template
-  Object.entries(variables).forEach(([key, value]) => {
-    const placeholder = `{{${key}}}`;
-    system = system.replace(new RegExp(placeholder, 'g'), value);
-    user = user.replace(new RegExp(placeholder, 'g'), value);
-  });
+  // Combine system + user thành string
+  let combined = `${template.system}\n\nUser: ${template.user}`;
+  
+  // Thay thế variables nếu có
+  if (variables) {
+    Object.entries(variables).forEach(([key, value]) => {
+      const placeholder = `{{${key}}}`;
+      const valueStr = typeof value === 'string' ? value : JSON.stringify(value);
+      combined = combined.replace(new RegExp(placeholder, 'g'), valueStr);
+    });
+  }
 
-  return { system, user };
+  return combined;
 }

@@ -1,45 +1,77 @@
-import { NextRequest, NextResponse } from "next/server";
+// src/app/api/ai/gateway/route.ts
+import { NextResponse } from "next/server";
+import { buildContext } from "@/modules/ai/context";
+import { renderPrompt, guardrails } from "@/modules/ai/prompt";
+import { routeIntent } from "@/ai/router/RouterPolicy";
+import { checkIdempotent, saveIdempotent } from "@/ai/utils/idempotency";
+import { makeKey, getCache, setCache } from "@/ai/utils/cache";
 
-/**
- * AI Gateway Stub - Placeholder cho AI system
- * 
- * Contract:
- * POST /api/ai/gateway
- * Body: { idempotency_key?, user_id, intent, message }
- * Response: 200 "OK: stub"
- */
-export async function POST(req: NextRequest) {
+type GatewayBody = {
+  user_id: string;
+  intent: string;
+  message?: string;
+  vars?: Record<string, any>;
+};
+
+export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { idempotency_key, user_id, intent, message } = body;
+    const idempKey = req.headers.get("Idempotency-Key") || "";
+    const body = (await req.json()) as GatewayBody;
 
-    // Basic validation
-    if (!user_id || !intent || !message) {
+    if (!body?.user_id || !body?.intent) {
       return NextResponse.json(
-        { error: "Missing required fields: user_id, intent, message" },
+        { error: "Bad Request", message: "user_id and intent are required" },
         { status: 400 }
       );
     }
 
-    // Stub response - sẽ thay bằng AI logic thật sau
-    return NextResponse.json(
-      { 
-        status: "OK: stub",
-        received: {
-          idempotency_key,
-          user_id,
-          intent,
-          message: message.substring(0, 50) + "..."
-        },
-        timestamp: new Date().toISOString()
-      },
-      { status: 200 }
-    );
+    // check idempotent
+    const prev = checkIdempotent(idempKey);
+    if (prev) return NextResponse.json(prev);
 
-  } catch (error) {
+    // route intent
+    const decision = routeIntent(body.intent as any);
+
+    // build context
+    const ctx = await buildContext(body.user_id);
+
+    // prompt render
+    const prompt: string = renderPrompt(body.intent, {
+      message: body.message || "",
+      context_json: ctx,
+      ...body.vars,
+    });
+
+    // cache by prompt
+    const cacheKey = makeKey({ intent: body.intent, prompt });
+    const cached = getCache(cacheKey, decision.cacheTtlSec);
+    if (cached) return NextResponse.json(cached);
+
+    // TODO: gọi model thật (nano/mini). Hiện tại stub.
+    const output = `[${decision.model}] ${prompt.slice(0, 120)}…`;
+
+    // guardrails
+    const safety = guardrails(output);
+
+    const response = {
+      request_id: crypto.randomUUID(),
+      ts: Date.now(),
+      model: decision.model,
+      tokens: 0,
+      output,
+      safety,
+      idempotency_key: idempKey || null,
+    };
+
+    // save cache & idempotency
+    if (decision.cacheTtlSec > 0) setCache(cacheKey, response);
+    if (idempKey) saveIdempotent(idempKey, response);
+
+    return NextResponse.json(response);
+  } catch (err: any) {
     return NextResponse.json(
-      { error: "Invalid JSON body" },
-      { status: 400 }
+      { error: "InternalError", message: err?.message ?? "unknown" },
+      { status: 500 }
     );
   }
 }
