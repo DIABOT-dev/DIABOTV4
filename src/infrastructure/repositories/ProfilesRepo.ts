@@ -1,20 +1,9 @@
-import { createServerClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
+import { supabaseAdmin } from "@/lib/supabase/serverClient";
 import { Profile } from "@/domain/types";
 
 export class ProfilesRepo {
-  private getClient() {
-    const cookieStore = cookies();
-    return createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      { cookies: { get: (name) => cookieStore.get(name)?.value } }
-    );
-  }
-
   async create(profile: Omit<Profile, 'id' | 'created_at' | 'updated_at'>): Promise<Profile> {
-    const supabase = this.getClient();
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('profiles')
       .insert(profile)
       .select()
@@ -25,8 +14,7 @@ export class ProfilesRepo {
   }
 
   async getById(id: string): Promise<Profile | null> {
-    const supabase = this.getClient();
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('profiles')
       .select('*')
       .eq('id', id)
@@ -40,8 +28,7 @@ export class ProfilesRepo {
   }
 
   async update(id: string, updates: Partial<Profile>): Promise<Profile> {
-    const supabase = this.getClient();
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('profiles')
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('id', id)
