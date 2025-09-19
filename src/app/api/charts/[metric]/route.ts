@@ -18,7 +18,7 @@ export async function GET(req: NextRequest, { params }: { params: { metric: stri
   const range = url.searchParams.get("range") ?? "7d";
   const since = startFromRange(range).toISOString().slice(0,10); // YYYY-MM-DD
 
-  const sb = supabaseAdmin();
+  const sb = supabaseAdmin;
 
   // Try Chart DB first
   const { data, error } = await sb

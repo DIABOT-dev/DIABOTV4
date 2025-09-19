@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
   const startTime = startOfDay(new Date(targetDay)).toISOString();
   const endTime = endOfDay(new Date(targetDay)).toISOString();
 
-  const sb = supabaseAdmin();
+  const sb = supabaseAdmin;
 
   try {
     // Aggregate glucose data

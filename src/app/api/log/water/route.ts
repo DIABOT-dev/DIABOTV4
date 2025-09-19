@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
   const { amount_ml, kind, taken_at } = parse.data;
   const taken = taken_at ? new Date(taken_at).toISOString() : new Date().toISOString();
 
-  const sb = supabaseAdmin();
+  const sb = supabaseAdmin;
   const { data, error } = await sb
     .from("water_logs")
     .insert({ user_id: userId, amount_ml, kind, taken_at: taken })
