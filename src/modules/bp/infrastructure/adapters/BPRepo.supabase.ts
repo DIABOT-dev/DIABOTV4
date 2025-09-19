@@ -35,3 +35,5 @@ export const BPRepo = {
 
     if (error) throw error;
     return data;
+  }
+}
