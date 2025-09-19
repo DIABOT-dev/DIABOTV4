@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { supabaseAdmin } from "@/src/lib/db";
-import { getUserId } from "@/src/lib/auth/getUserId";
+import { supabaseAdmin } from "@/lib/db";
+import { getUserId } from "@/lib/auth/getUserId";
 
 const bodySchema = z.object({
   dose_units: z.number().min(0.1).max(100),

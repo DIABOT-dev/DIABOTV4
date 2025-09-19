@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { supabaseAdmin } from "@/src/lib/db";
-import { getUserId } from "@/src/lib/auth/getUserId";
+import { supabaseAdmin } from "@/lib/db";
+import { getUserId } from "@/lib/auth/getUserId";
 
 const bodySchema = z.object({
   weight_kg: z.number().min(20).max(300),

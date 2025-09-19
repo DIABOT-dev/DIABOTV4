@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabaseAdmin } from "@/src/lib/db";
-import { getUserId } from "@/src/lib/auth/getUserId";
+import { supabaseAdmin } from "@/lib/db";
+import { getUserId } from "@/lib/auth/getUserId";
 
 export async function GET(req: NextRequest, { params }: { params: { id: string }}) {
   const uid = getUserId(req);
