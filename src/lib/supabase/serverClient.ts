@@ -10,3 +10,9 @@ export function createServerSupabase(): SupabaseClient {
   _instance = createClient(url, key, { auth: { persistSession: false } });
   return _instance;
 }
+
+// Export as instance for consistent usage
+export const supabaseAdmin = createServerSupabase();
+
+// Legacy compatibility
+export const sbServer = createServerSupabase;
