@@ -25,16 +25,9 @@ export type Intent =
   | "coach_checkin" 
   | "reminder_reason" 
   | "safety_escalation" 
-  | "classify" 
+  | "classify_intent"
   | "detect_intent";
 
 export type SafetyResult =
   | { escalate: false }
   | { escalate: true; text: string; reason: string; kind: "bg" | "bp" };
-
-export type Intent = 
-  | "coach_checkin" 
-  | "reminder_reason" 
-  | "safety_escalation" 
-  | "classify_intent"
-  | "detect_intent";

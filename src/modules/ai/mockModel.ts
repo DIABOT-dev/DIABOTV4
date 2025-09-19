@@ -1,4 +1,4 @@
-import type { AIContext } from "../types";
+import type { AIContext, Intent } from "./types";
 
 export async function generateMock(opts:{intent:string; ctx:AIContext; message?:string}) {
   const { intent, ctx, message="" } = opts;
