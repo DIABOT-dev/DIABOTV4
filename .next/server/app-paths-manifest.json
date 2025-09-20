@@ -1,7 +1,4 @@
 {
-  "/page": "app/page.js",
-  "/log/meal/page": "app/log/meal/page.js",
-  "/api/qa/selftest/route": "app/api/qa/selftest/route.js",
-  "/api/ai/gateway/route": "app/api/ai/gateway/route.js",
-  "/api/qa/evaluate/route": "app/api/qa/evaluate/route.js"
+  "/_not-found/page": "app/_not-found/page.js",
+  "/page": "app/page.js"
 }
