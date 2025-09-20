@@ -69,6 +69,36 @@ curl -s -X POST http://localhost:3000/api/qa/evaluate | jq
 }
 ```
 
+### Internal QA Endpoints
+
+```bash
+# Self-test (environment, connections, health)
+curl -s http://localhost:3000/api/qa/selftest | jq
+
+# AI evaluation of system health
+curl -s -X POST http://localhost:3000/api/qa/evaluate | jq
+```
+
+**Expected Output:**
+```json
+{
+  "meta": {
+    "id": "uuid",
+    "commit": "local-dev",
+    "branch": "local",
+    "startedAt": "2025-01-27T...",
+    "finishedAt": "2025-01-27T..."
+  },
+  "stats": {
+    "total": 3,
+    "passed": 3,
+    "failed": 0,
+    "warned": 0
+  },
+  "items": [...]
+}
+```
+
 ## 🎛️ Feature Flags
 
 Configure via environment variables in `.env.local`:
